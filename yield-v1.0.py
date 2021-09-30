@@ -21,17 +21,17 @@ class MyWindow(QMainWindow):
 
         # Create PyQt5 window
         self.setWindowTitle("KIWOOM")
-        self.setGeometry(300, 100, 300, 800)
+        self.setGeometry(300, 100, 400, 800)
 
         # Create Log Message Box
         self.text_edit = QTextEdit(self)
-        self.text_edit.setGeometry(10, 260, 280, 500)
+        self.text_edit.setGeometry(10, 260, 380, 500)
         self.text_edit.setEnabled(False)
         self.text_edit.append("Please Wait Login...")
 
         # Program Quit
         btn_quit = QPushButton("Quit", self)
-        btn_quit.move(80, 20)
+        btn_quit.move(100, 20)
         btn_quit.clicked.connect(QCoreApplication.instance().quit)
 
 
@@ -42,10 +42,10 @@ class MyWindow(QMainWindow):
         label_account.move(20, 60)
 
         self.text_account = QLineEdit(self)
-        self.text_account.move(80, 60)
+        self.text_account.move(100, 60)
 
         btn_account = QPushButton("Check", self)
-        btn_account.move(190, 60)
+        btn_account.move(240, 60)
         btn_account.clicked.connect(self.btn_account_click)
 
 
@@ -56,7 +56,7 @@ class MyWindow(QMainWindow):
         label_password.move(20, 100)
 
         btn_password = QPushButton("Submit", self)
-        btn_password.move(190, 100)
+        btn_password.move(240, 100)
         btn_password.clicked.connect(self.btn_password_click)
 
 
@@ -71,10 +71,10 @@ class MyWindow(QMainWindow):
         self.set_dateStart.setCalendarPopup(True)
         self.set_dateStart.setDateRange(QDate(1999, 1, 1), QDate(2099, 12, 31))
         self.set_dateStart.setDate(QDate(self.dateStart[0], self.dateStart[1], self.dateStart[2]))
-        self.set_dateStart.move(80, 140)
+        self.set_dateStart.move(100, 140)
 
         btn_dateStart = QPushButton("Apply", self)
-        btn_dateStart.move(190, 140)
+        btn_dateStart.move(240, 140)
         btn_dateStart.clicked.connect(self.btn_dateStart_click)
 
 
@@ -89,10 +89,10 @@ class MyWindow(QMainWindow):
         self.set_dateEnd.setCalendarPopup(True)
         self.set_dateEnd.setDateRange(QDate(1999, 1, 1), QDate(2099, 12, 31))
         self.set_dateEnd.setDate(QDate(self.dateEnd[0], self.dateEnd[1], self.dateEnd[2]))
-        self.set_dateEnd.move(80, 180)
+        self.set_dateEnd.move(100, 180)
 
         btn_dateEnd = QPushButton("Apply", self)
-        btn_dateEnd.move(190, 180)
+        btn_dateEnd.move(240, 180)
         btn_dateEnd.clicked.connect(self.btn_dateEnd_click)
 
 
@@ -103,7 +103,7 @@ class MyWindow(QMainWindow):
         label_yield.move(20, 220)
 
         btn_yield = QPushButton("Calculate", self)
-        btn_yield.move(190, 220)
+        btn_yield.move(240, 220)
         btn_yield.clicked.connect(self.btn_yield_click)
 
 

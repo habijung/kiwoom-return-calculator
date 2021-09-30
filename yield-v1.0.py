@@ -21,11 +21,11 @@ class MyWindow(QMainWindow):
 
         # Create PyQt5 window
         self.setWindowTitle("KIWOOM")
-        self.setGeometry(300, 100, 300, 500)
+        self.setGeometry(300, 100, 300, 800)
 
         # Create Log Message Box
         self.text_edit = QTextEdit(self)
-        self.text_edit.setGeometry(10, 260, 280, 200)
+        self.text_edit.setGeometry(10, 260, 280, 500)
         self.text_edit.setEnabled(False)
         self.text_edit.append("Please Wait Login...")
 
@@ -177,16 +177,11 @@ class MyWindow(QMainWindow):
             self.text_edit.append("Submit your password.")
 
         else:
-            self.text_edit.append("\n*************************\n")
-            self.text_edit.append("Account : "       + account[:4] + "-" + account[4:8] + "-" + account[8:])
-            self.text_edit.append("Password : "      + "**********")
-            self.text_edit.append("Date Start : "    + date_start)
-            self.text_edit.append("Date End   : "    + date_end)
-            self.text_edit.append("Password Type : " + pw_type)
-            self.text_edit.append("\n*************************\n")
+            self.text_edit.append("\n*************************")
+            self.text_edit.append("    " + date_start + " - " + date_end)
 
             self.kiwoom.dynamicCall("SetInputValue(QString, QString", "계좌번호", account)
-            # self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호", "")
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호", "")
             self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가시작일", date_start)
             self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가종료일", date_end)
             self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호입력매체구분", pw_type)
@@ -216,9 +211,8 @@ class MyWindow(QMainWindow):
             yieldResult = self.kiwoom.dynamicCall("GetCommData(QString, QString, int, QString)", trcode, rqname, 0, "수익률")
             yieldPercent = float(yieldResult) / 100
             
-            self.text_edit.append('Yield : {:.2f} %'.format(yieldPercent))
-            # self.text_edit.append("Yield : " + yieldResult)
-            self.text_edit.append("\n*************************\n")
+            self.text_edit.append("    Yield : {:.2f} %".format(yieldPercent))
+            self.text_edit.append("*************************\n")
 
 
 

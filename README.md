@@ -1,6 +1,6 @@
-# KIWOOM OpenAPI Yield Calculator
+# KIWOOM OpenAPI Daily Return Calculator
 
-**KIWOOM OpenAPI Yield Calculator v1.0**
+**KIWOOM OpenAPI Daily Return Calculator v1.1**
 
 **키움증권 OpenAPI+** 를 활용한 기간별 계좌 수익률 계산기
 
@@ -38,4 +38,4 @@
 <br>
 
 ---
-**Updated :** 2021-09-30 12:41
+**Updated :** 2021-10-01 18:19

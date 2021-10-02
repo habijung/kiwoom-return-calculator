@@ -18,7 +18,17 @@
 
 ## Run v1.0
 
-<table style="border-collapse: separate; border-spacing: 10px 10px;">
+<style>
+    .table-run {
+        border-collapse: separate;
+        border-spacing: 10px 10px;
+    }
+    .table-run td {
+        border: none;
+    }
+</style>
+
+<table class="table-run">
     <tr>
         <td><h3>시작 화면</h3></td>
         <td><h3>날짜 선택</h3></td>

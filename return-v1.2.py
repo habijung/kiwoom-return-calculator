@@ -14,7 +14,7 @@ class MyWindow(QMainWindow):
         self.kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
 
         # KIWOOM OpenAPI+ Login
-        #self.kiwoom.dynamicCall("CommConnect()")
+        self.kiwoom.dynamicCall("CommConnect()")
 
         # KIWOOM OpenAPI+ Event
         self.kiwoom.OnEventConnect.connect(self.event_connect)

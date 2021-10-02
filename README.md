@@ -17,37 +17,26 @@
 
 
 ## Run v1.0
-
-<style>
-    .table-run {
-        border-collapse: separate;
-        border-spacing: 10px 10px;
-    }
-    .table-run td {
-        border: none;
-    }
-</style>
-
-<table class="table-run">
+<table style="border-collapse: separate; border-spacing: 10px 10px;">
     <tr>
-        <td><h3>시작 화면</h3></td>
-        <td><h3>날짜 선택</h3></td>
+        <td style="border: none;"><h3>시작 화면</h3></td>
+        <td style="border: none;"><h3>날짜 선택</h3></td>
     </tr>
     <tr>
-        <td><img src="img/run1.jpg" width="300px"></td>
-        <td><img src="img/run3.jpg" width="300px"></td>
+        <td style="border: none;"><img src="img/run1.jpg" width="300px"></td>
+        <td style="border: none;"><img src="img/run3.jpg" width="300px"></td>
     </tr>
     <tr>
-        <td colspan="2"><h3>비밀번호 입력창</h3></td>
+        <td colspan="2" style="border: none;"><h3>비밀번호 입력창</h3></td>
     </tr>
     <tr>
-        <td colspan="2"><img src="img/run2.jpg" width="500px"></td>
+        <td colspan="2" style="border: none;"><img src="img/run2.jpg" width="500px"></td>
     </tr>
     <tr>
-        <td colspan="2"><h3>결과</h3></td>
+        <td colspan="2" style="border: none;"><h3>결과</h3></td>
     </tr>
     <tr>
-        <td colspan="2"><img src="img/run4.jpg" width="300px"></td>
+        <td colspan="2" style="border: none;"><img src="img/run4.jpg" width="300px"></td>
     </tr>
 </table>
 

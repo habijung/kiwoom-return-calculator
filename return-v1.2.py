@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QAxContainer import *
+from PyQt5.QtGui import *
 
-global flag
-flag = 0
+
 
 class MyWindow(QMainWindow):
     def __init__(self):
@@ -23,7 +23,7 @@ class MyWindow(QMainWindow):
         self.kiwoom.OnReceiveTrData.connect(self.receive_trdata)
 
         # Create PyQt5 window
-        self.setWindowTitle("KIWOOM")
+        self.setWindowTitle("KIWOOM Return Calculator")
         self.setGeometry(500, 100, 400, 600)
 
 
@@ -31,28 +31,41 @@ class MyWindow(QMainWindow):
         #     Start Settings     #
         ##########################
         self.text_edit = QTextEdit(self)
-        self.text_edit.setEnabled(True)
+        self.text_edit.setDisabled(True)
         self.text_edit.setGeometry(30, 260, 340, 320)
-        self.text_edit.append("Please Wait Login...")
+        self.text_edit.append("************************************")
+        self.text_edit.append("*     KIWOOM Return Calculator")
+        self.text_edit.append("*     Please Wait for Login...")
+
+        self.btnQuit = self.create_btn("Quit", 140, 20)
+        self.btnQuit.setDisabled(True)
+        self.btnQuit.clicked.connect(QCoreApplication.instance().quit)
 
         self.get_date()
-        self.create_btn("Quit", 140, 20, QCoreApplication.instance().quit)
 
 
         ###########################
         #     Label : Account     #
         ###########################
         self.create_label("Account : ", 40, 60)
-        self.create_btn("Check", 140, 60, self.btn_account)
+
+        self.btnAccount = self.create_btn("Check", 140, 60)
+        self.btnAccount.setDisabled(True)
+        self.btnAccount.clicked.connect(self.btn_account_click)
+
         self.text_account = QLineEdit(self)
         self.text_account.move(260, 60)
+        self.text_account.setDisabled(True)
 
 
         ############################
         #     Label : Password     #
         ############################
         self.create_label("Password : ", 40, 100)
-        self.create_btn("Submit", 140, 100, self.btn_password)
+
+        self.btnPassword = self.create_btn("Submit", 140, 100)
+        self.btnPassword.setDisabled(True)
+        self.btnPassword.clicked.connect(self.btn_password_click)
 
 
         ##############################
@@ -62,7 +75,7 @@ class MyWindow(QMainWindow):
 
         self.dateStartIns = QDateEdit(self)
         self.set_dateInstance(self.dateStartIns, self.dateStart, 140, 140)
-
+        self.dateStartIns.setDisabled(True)
         self.dateStartIns.dateChanged.connect(self.update_dateStart)
 
 
@@ -73,7 +86,7 @@ class MyWindow(QMainWindow):
 
         self.dateEndIns = QDateEdit(self)
         self.set_dateInstance(self.dateEndIns, self.dateEnd, 140, 180)
-
+        self.dateEndIns.setDisabled(True)
         self.dateEndIns.dateChanged.connect(self.update_dateEnd)
 
 
@@ -81,37 +94,24 @@ class MyWindow(QMainWindow):
         #     Calculate Return     #
         ############################
         self.create_label("Return : ", 40, 220)
-        self.create_btn("Calculate", 140, 220, self.btn_return)
+
+        self.btnReturn = self.create_btn("Calculate", 140, 220)
+        self.btnReturn.setDisabled(True)
+        self.btnReturn.clicked.connect(self.btn_return_click)
 
 
-    #########################
-    #     Ftn : Connect     #
-    #########################
+
+    ###############################
+    #     Ftn : Program Start     #
+    ###############################
     def event_connect(self, err_code):
         if err_code == 0:
-            flag = 1
+            self.text_edit.append("*     Login Complete.")
+            self.text_edit.append("************************************\n")
             self.get_started()
-            self.text_edit.append("Login Complete.")
 
-
-    ########################
-    #     Ftn : Create     #
-    ########################
-    def create_label(self, label_name, px, py):
-        name = QLabel(label_name, self)
-        name.move(px, py)
-
-    def create_btn(self, btn_name, px, py, ftn):
-        name = QPushButton(btn_name, self)
-        name.move(px, py)
-        name.resize(100, 30)
-        name.clicked.connect(ftn)
-
-
-    ##########################
-    #     Ftn : Get Info     #
-    ##########################
     def get_started(self):
+        self.set_edit_on()
         self.get_account()
         self.pwState = 1
         self.print_date(self.text_edit, self.dateStart, "Start")
@@ -119,8 +119,8 @@ class MyWindow(QMainWindow):
 
     def get_account(self):
         self.account = self.kiwoom.dynamicCall("GetLoginInfo(QString)", ["ACCNO"]).rstrip(';')
-        account = self.account[:4] + "-" + self.account[4:8] + "-" + self.account[8:]
-        self.text_account.setText(account)
+        accountStr = self.account[:4] + "-" + self.account[4:8] + "-" + self.account[8:]
+        self.text_account.setText(accountStr)
 
     def get_password(self):
         self.kiwoom.dynamicCall("KOA_Functions(QString, QString)", "ShowAccountWindow", "")
@@ -132,109 +132,99 @@ class MyWindow(QMainWindow):
         self.dateStart = QDate(dateToday[0], dateToday[1], 1)
         self.dateEnd   = QDate(dateToday[0], dateToday[1], dateToday[2])
 
+    def set_edit_on(self):
+        self.text_edit.setEnabled(True)
+
+        self.btnQuit.setEnabled(True)
+        self.btnAccount.setEnabled(True)
+        self.btnPassword.setEnabled(True)
+        self.btnReturn.setEnabled(True)
+
+        self.dateStartIns.setEnabled(True)
+        self.dateEndIns.setEnabled(True)
+
+
+    ########################
+    #     Ftn : Create     #
+    ########################
+    def create_label(self, label_name, px, py):
+        name = QLabel(label_name, self)
+        name.move(px, py)
+
+    def create_btn(self, btn_name, px, py):
+        name = QPushButton(btn_name, self)
+        name.move(px, py)
+        name.resize(100, 30)
+
+        return name
+
 
     ########################
     #     Ftn : Button     #
     ########################
-    def btn_account(self):
-        self.get_account()
-        self.text_edit.append("Complete account check.")
-
-    def btn_password(self):
-        self.get_password()
-        self.text_edit.append("Complete password submit.")
-
-    def btn_return(self):
-        date_start = self.dateStart
-        date_end   = self.dateEnd
-
-        if date_start == date_end:
-            self.text_edit.append("********************")
-            self.calculate_return_daily(date_start)
-            self.text_edit.append("********************")
-
-
-        else:
-            self.text_edit.append("********************")
-
-            while True:
-                self.calculate_return_daily(date_start)
-                date_start = date_start.addDays(1)
-
-                if date_start == date_end:
-                    date_start = self.dateStart
-                    break
-
-            self.text_edit.append("********************")
-            self.calculate_return_period(date_start, date_end)
-            self.text_edit.append("********************")
-
-
-    def calculate_return_daily(self, qStart):
-        str_start = self.set_dateString(qStart)
-        period = "Date : " + str_start[:4] + "-" + str_start[4:6] + "-" + str_start[6:]
-
-        self.text_edit.append(period)
-        self.request_return(str_start, str_start)
-
-    def calculate_return_period(self, qStart, qEnd):
-        str_start = self.set_dateString(qStart)
-        str_end   = self.set_dateString(qEnd)
-        period = "Period : " + str_start[:4] + "-" + str_start[4:6] + "-" + str_start[6:]
-        period = period + " ~ " + str_end[:4] + "-" + str_end[4:6] + "-" + str_end[6:]
-
-        self.text_edit.append(period)
-        self.request_return(str_start, str_end)
-
-    def request_return(self, sStart, sEnd):
-        account = self.account
-        password_state = self.pwState
-        password_type  = "00"
-
-        if password_state == 0:
-            self.text_edit.append("Please submit your password.")
-
-        else:
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "계좌번호", account)
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호", "")
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가시작일", sStart)
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가종료일", sEnd)
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호입력매체구분", password_type)
-
-            self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "OPW00016_REQ", "OPW00016", 0, "0101")
-
-
-        return
-        account = self.account
-        password_state = self.pwState
-        password_type  = "00"
-        date_start = self.dateStartStr[0] + self.dateStartStr[1] + self.dateStartStr[2]
-        date_end = self.dateEndStr[0] + self.dateEndStr[1] + self.dateEndStr[2]
-
-        if password_state == 0:
-            self.text_edit.append("Please submit your password.")
-
-        else:
-            self.text_edit.append("\n*************************")
-            self.text_edit.append("    " + date_start + " - " + date_end)
-
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "계좌번호", account)
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호", "")
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가시작일", date_start)
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가종료일", date_end)
-            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호입력매체구분", password_type)
-            self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "OPW00016_REQ", "OPW00016", 0, "0101")
-
-
     def btn_get_code(self):
         code = self.code_edit.text()
         self.text_edit.append("종목코드 : " + code)
 
-        # SetInputValue
         self.kiwoom.dynamicCall("SetInputValue(QString, QString)", "종목코드", code)
-
-        # CommRqData
         self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "OPT10001_REQ", "OPT10001", 0, "0101")
+
+    def btn_account_click(self):
+        self.get_account()
+        self.text_edit.append("Complete account check.")
+
+    def btn_password_click(self):
+        self.get_password()
+        self.text_edit.append("Complete password submit.")
+
+    def btn_return_click(self):
+        self.text_edit.append("\n************************************")
+        self.dateTmp = self.dateStart
+
+        if self.dateTmp == self.dateEnd:
+            self.request_return(self.dateTmp, self.dateEnd, 0)
+
+        else:
+            while self.dateTmp != self.dateEnd:
+                self.request_return(self.dateTmp, self.dateEnd, 1)
+
+            self.request_return(self.dateStart, self.dateEnd, 2)
+
+
+    ##################################
+    #     Ftn : Calculate Return     #
+    ##################################
+    def request_return(self, qStart, qEnd, sig):
+        if sig == 0:
+            date_start = self.set_dateString(qStart)
+
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "계좌번호", self.account)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호", "")
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가시작일", date_start)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가종료일", date_start)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호입력매체구분", "00")
+            self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "req0", "OPW00016", 0, "0101")
+
+        elif sig == 1:
+            date_start = self.set_dateString(qStart.addDays(1))
+
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "계좌번호", self.account)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호", "")
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가시작일", date_start)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가종료일", date_start)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호입력매체구분", "00")
+            self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "req0", "OPW00016", 0, "0101")
+
+        else:
+            date_start = self.set_dateString(qStart.addDays(1))
+            date_end   = self.set_dateString(qEnd)
+
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "계좌번호", self.account)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호", "")
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가시작일", date_start)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가종료일", date_end)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호입력매체구분", "00")
+            self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "req1", "OPW00016", 0, "0102")
 
 
     #########################
@@ -248,26 +238,36 @@ class MyWindow(QMainWindow):
             self.text_edit.append("종목명: " + name.strip())
             self.text_edit.append("거래량: " + volume.strip())
         
-        elif rqname == "OPW00016_REQ":
+        elif rqname == "req0":
             ret = self.kiwoom.dynamicCall("GetCommData(QString, QString, int, QString)", trcode, rqname, 0, "수익률")
             per = float(ret) / 100
-            
-            self.text_edit.append("    Return : {:.2f} %".format(per))
-            self.text_edit.append("*************************\n")
+
+            str1 = self.set_dateString(self.dateTmp)
+            str2 = self.dateTmp.toString("ddd")
+            str3 = str1[:4] + "-" + str1[4:6] + "-" + str1[6:] + " (" + str2 + ")"
+            str4 = str3 + " : {:.2f} %".format(per)
+
+            self.text_edit.append(str4)
+            self.dateTmp = self.dateTmp.addDays(1)
+            time.sleep(0.2)
+
+        elif rqname == "req1":
+            self.text_edit.append("Print Req1")
 
 
-    ########################
-    #     Ftn : Others     #
-    ########################
+    ##############################
+    #     Ftn : Date Control     #
+    ##############################
     def print_date(self, target, qdate, dateType):
         dateStr = self.set_dateString(qdate)
-        target.append("Date " + dateType + " : "+ dateStr[:4] + "-" + dateStr[4:6] + "-" + dateStr[6:])
+        target.append("Date " + dateType + " : " + dateStr[:4] + "-" + dateStr[4:6] + "-" + dateStr[6:])
 
     def set_dateString(self, qdate):
         sYear  = qdate.toString("yyyy")
         sMonth = qdate.toString("MM")
         sDay   = qdate.toString("dd")
         sDate  = sYear + sMonth + sDay
+
         return sDate
 
     def set_dateInstance(self, dateIns, dateTmp, px, py):
@@ -284,7 +284,7 @@ class MyWindow(QMainWindow):
             # Date Start > Date End
             if self.dateUpdated == 2:
                 self.dateUpdated = 0
-                self.text_edit.append("\nStart date cannot exceed end date.")
+                self.text_edit.append("Start date cannot exceed end date.")
                 self.print_date(self.text_edit, self.dateStart, "Start")
 
         else:
@@ -302,7 +302,7 @@ class MyWindow(QMainWindow):
             # Date End < Date Start
             if self.dateUpdated == 2:
                 self.dateUpdated = 0
-                self.text_edit.append("\nEnd date cannot precede start date.")
+                self.text_edit.append("End date cannot precede start date.")
                 self.print_date(self.text_edit, self.dateEnd, "End")
 
         elif newDate > QDate.currentDate():
@@ -312,7 +312,7 @@ class MyWindow(QMainWindow):
             # Date End > Today
             if self.dateUpdated == 2:
                 self.dateUpdated = 0
-                self.text_edit.append("\nEnd date cannot exceed today.")
+                self.text_edit.append("End date cannot exceed today.")
                 self.print_date(self.text_edit, self.dateEnd, "End")
 
         else:
@@ -330,9 +330,8 @@ if __name__ == "__main__":
     print("\n===== kiwoom.py =====\n")
 
     app = QApplication(sys.argv)
+
     mywindow = MyWindow()
-
-    time.sleep(3)
-
     mywindow.show()
+
     app.exec_()

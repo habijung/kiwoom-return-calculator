@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QAxContainer import *
 
+global flag
+flag = 0
 
 class MyWindow(QMainWindow):
     def __init__(self):
@@ -57,10 +59,10 @@ class MyWindow(QMainWindow):
         #     Label : Date Start     #
         ##############################
         self.create_label("Date Start : ", 40, 140)
-        #self.create_btn("Apply", 260, 140, self.btn_dateStart)
 
         self.dateStartIns = QDateEdit(self)
         self.set_dateInstance(self.dateStartIns, self.dateStart, 140, 140)
+
         self.dateStartIns.dateChanged.connect(self.update_dateStart)
 
 
@@ -68,10 +70,10 @@ class MyWindow(QMainWindow):
         #     Label : Date End     #
         ############################
         self.create_label("Date End : ", 40, 180)
-        #self.create_btn("Apply", 260, 180, self.btn_dateEnd)
 
         self.dateEndIns = QDateEdit(self)
         self.set_dateInstance(self.dateEndIns, self.dateEnd, 140, 180)
+
         self.dateEndIns.dateChanged.connect(self.update_dateEnd)
 
 
@@ -82,14 +84,12 @@ class MyWindow(QMainWindow):
         self.create_btn("Calculate", 140, 220, self.btn_return)
 
 
-    def tt(self, newDate):
-        print("TEST" + newDate.toString())
-
     #########################
     #     Ftn : Connect     #
     #########################
     def event_connect(self, err_code):
         if err_code == 0:
+            flag = 1
             self.get_started()
             self.text_edit.append("Login Complete.")
 
@@ -114,14 +114,13 @@ class MyWindow(QMainWindow):
     def get_started(self):
         self.get_account()
         self.pwState = 1
-        self.print_date(self.text_edit, self.dateStartStr, "Start")
-        self.text_edit.append("Date start : " + self.dateStartStr[0] + "-" + self.dateStartStr[1] + "-" + self.dateStartStr[2])
-        self.text_edit.append("Date end : "   + self.dateEndStr[0]   + "-" + self.dateEndStr[1]   + "-" + self.dateEndStr[2])
+        self.print_date(self.text_edit, self.dateStart, "Start")
+        self.print_date(self.text_edit, self.dateEnd, "End")
 
     def get_account(self):
         self.account = self.kiwoom.dynamicCall("GetLoginInfo(QString)", ["ACCNO"]).rstrip(';')
-        self.account = self.account[:4] + "-" + self.account[4:8] + "-" + self.account[8:]
-        self.text_account.setText(self.account)
+        account = self.account[:4] + "-" + self.account[4:8] + "-" + self.account[8:]
+        self.text_account.setText(account)
 
     def get_password(self):
         self.kiwoom.dynamicCall("KOA_Functions(QString, QString)", "ShowAccountWindow", "")
@@ -130,10 +129,8 @@ class MyWindow(QMainWindow):
     def get_date(self):
         dateToday = [datetime.today().year, datetime.today().month, datetime.today().day]
         self.dateUpdated = 0
-        self.dateStart = [dateToday[0], dateToday[1], 1]
-        self.dateEnd   = [dateToday[0], dateToday[1], dateToday[2]]
-        self.dateStartStr = self.set_dateString(self.dateStart)
-        self.dateEndStr   = self.set_dateString(self.dateEnd)
+        self.dateStart = QDate(dateToday[0], dateToday[1], 1)
+        self.dateEnd   = QDate(dateToday[0], dateToday[1], dateToday[2])
 
 
     ########################
@@ -147,25 +144,67 @@ class MyWindow(QMainWindow):
         self.get_password()
         self.text_edit.append("Complete password submit.")
 
-    def btn_dateStart(self):
-        sYear  = self.set_dateStart.date().toString("yyyy")
-        sMonth = self.set_dateStart.date().toString("MM")
-        sDay   = self.set_dateStart.date().toString("dd")
-        self.dateStart = [int(sYear), int(sMonth), int(sDay)]
-        self.dateStartStr = [sYear, sMonth, sDay]
-        self.text_edit.append("Date Start : " + sYear + "-" + sMonth + "-" + sDay)
-
-
-    def btn_dateEnd(self):
-        sYear  = self.set_dateEnd.date().toString("yyyy")
-        sMonth = self.set_dateEnd.date().toString("MM")
-        sDay   = self.set_dateEnd.date().toString("dd")
-        self.dateEnd = [int(sYear), int(sMonth), int(sDay)]
-        self.dateEndStr = [sYear, sMonth, sDay]
-        self.text_edit.append("Date End : " + sYear + "-" + sMonth + "-" + sDay)
-
-
     def btn_return(self):
+        date_start = self.dateStart
+        date_end   = self.dateEnd
+
+        if date_start == date_end:
+            self.text_edit.append("********************")
+            self.calculate_return_daily(date_start)
+            self.text_edit.append("********************")
+
+
+        else:
+            self.text_edit.append("********************")
+
+            while True:
+                self.calculate_return_daily(date_start)
+                date_start = date_start.addDays(1)
+
+                if date_start == date_end:
+                    date_start = self.dateStart
+                    break
+
+            self.text_edit.append("********************")
+            self.calculate_return_period(date_start, date_end)
+            self.text_edit.append("********************")
+
+
+    def calculate_return_daily(self, qStart):
+        str_start = self.set_dateString(qStart)
+        period = "Date : " + str_start[:4] + "-" + str_start[4:6] + "-" + str_start[6:]
+
+        self.text_edit.append(period)
+        self.request_return(str_start, str_start)
+
+    def calculate_return_period(self, qStart, qEnd):
+        str_start = self.set_dateString(qStart)
+        str_end   = self.set_dateString(qEnd)
+        period = "Period : " + str_start[:4] + "-" + str_start[4:6] + "-" + str_start[6:]
+        period = period + " ~ " + str_end[:4] + "-" + str_end[4:6] + "-" + str_end[6:]
+
+        self.text_edit.append(period)
+        self.request_return(str_start, str_end)
+
+    def request_return(self, sStart, sEnd):
+        account = self.account
+        password_state = self.pwState
+        password_type  = "00"
+
+        if password_state == 0:
+            self.text_edit.append("Please submit your password.")
+
+        else:
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "계좌번호", account)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호", "")
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가시작일", sStart)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "평가종료일", sEnd)
+            self.kiwoom.dynamicCall("SetInputValue(QString, QString", "비밀번호입력매체구분", password_type)
+
+            self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "OPW00016_REQ", "OPW00016", 0, "0101")
+
+
+        return
         account = self.account
         password_state = self.pwState
         password_type  = "00"
@@ -210,31 +249,31 @@ class MyWindow(QMainWindow):
             self.text_edit.append("거래량: " + volume.strip())
         
         elif rqname == "OPW00016_REQ":
-            yieldResult = self.kiwoom.dynamicCall("GetCommData(QString, QString, int, QString)", trcode, rqname, 0, "수익률")
-            yieldPercent = float(yieldResult) / 100
+            ret = self.kiwoom.dynamicCall("GetCommData(QString, QString, int, QString)", trcode, rqname, 0, "수익률")
+            per = float(ret) / 100
             
-            self.text_edit.append("    Return : {:.2f} %".format(yieldPercent))
+            self.text_edit.append("    Return : {:.2f} %".format(per))
             self.text_edit.append("*************************\n")
 
 
     ########################
     #     Ftn : Others     #
     ########################
-    def print_date(self, target, dateStr, dateType):
-        target.append("Date " + dateType + " : "+ dateStr[0] + "-" + dateStr[1] + "-" + dateStr[2])
+    def print_date(self, target, qdate, dateType):
+        dateStr = self.set_dateString(qdate)
+        target.append("Date " + dateType + " : "+ dateStr[:4] + "-" + dateStr[4:6] + "-" + dateStr[6:])
 
-    def set_dateString(self, dateArr):
-        tmpDate = datetime(dateArr[0], dateArr[1], dateArr[2])
-        sYear   = tmpDate.strftime("%Y")
-        sMonth  = tmpDate.strftime("%m")
-        sDay    = tmpDate.strftime("%d")
-        
-        return [sYear, sMonth, sDay]
+    def set_dateString(self, qdate):
+        sYear  = qdate.toString("yyyy")
+        sMonth = qdate.toString("MM")
+        sDay   = qdate.toString("dd")
+        sDate  = sYear + sMonth + sDay
+        return sDate
 
-    def set_dateInstance(self, dateIns, dateArr, px, py):
+    def set_dateInstance(self, dateIns, dateTmp, px, py):
         dateIns.setCalendarPopup(True)
         dateIns.setDateRange(QDate(2000, 1, 1), QDate(2099, 12, 31))
-        dateIns.setDate(QDate(dateArr[0], dateArr[1], dateArr[2]))
+        dateIns.setDate(dateTmp)
         dateIns.move(px, py)
 
     def update_dateStart(self, newDate):
@@ -246,19 +285,14 @@ class MyWindow(QMainWindow):
             if self.dateUpdated == 2:
                 self.dateUpdated = 0
                 self.text_edit.append("\nStart date cannot exceed end date.")
-                self.print_date(self.text_edit, self.dateStartStr, "Start")
+                self.print_date(self.text_edit, self.dateStart, "Start")
 
         else:
-            nYear  = newDate.toString("yyyy")
-            nMonth = newDate.toString("MM")
-            nDay   = newDate.toString("dd")
-
-            self.dateStart = [int(nYear), int(nMonth), int(nDay)]
-            self.dateStartStr = self.set_dateString(self.dateStart)
+            self.dateStart = newDate
 
             # Date Start <= Date End
             if self.dateUpdated == 0:
-                self.print_date(self.text_edit, self.dateStartStr, "Start")
+                self.print_date(self.text_edit, self.dateStart, "Start")
             
     def update_dateEnd(self, newDate):
         if newDate < self.dateStartIns.date():
@@ -269,7 +303,7 @@ class MyWindow(QMainWindow):
             if self.dateUpdated == 2:
                 self.dateUpdated = 0
                 self.text_edit.append("\nEnd date cannot precede start date.")
-                self.print_date(self.text_edit, self.dateEndStr, "End")
+                self.print_date(self.text_edit, self.dateEnd, "End")
 
         elif newDate > QDate.currentDate():
             self.dateUpdated += 1
@@ -279,19 +313,14 @@ class MyWindow(QMainWindow):
             if self.dateUpdated == 2:
                 self.dateUpdated = 0
                 self.text_edit.append("\nEnd date cannot exceed today.")
-                self.print_date(self.text_edit, self.dateEndStr, "End")
+                self.print_date(self.text_edit, self.dateEnd, "End")
 
         else:
-            nYear  = newDate.toString("yyyy")
-            nMonth = newDate.toString("MM")
-            nDay   = newDate.toString("dd")
-
-            self.dateEnd = [int(nYear), int(nMonth), int(nDay)]
-            self.dateEndStr = self.set_dateString(self.dateEnd)
+            self.dateEnd = newDate
             
             # Date End <= Today
             if self.dateUpdated == 0:
-                self.print_date(self.text_edit, self.dateEndStr, "End")
+                self.print_date(self.text_edit, self.dateEnd, "End")
 
 
 
@@ -302,5 +331,8 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     mywindow = MyWindow()
+
+    time.sleep(3)
+
     mywindow.show()
     app.exec_()
